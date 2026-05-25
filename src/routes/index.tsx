@@ -3,6 +3,7 @@ import { CherryPlanet } from "@/components/CherryPlanet";
 import { OrbitNav } from "@/components/OrbitNav";
 import { SyrupGauge } from "@/components/SyrupGauge";
 import { HarvestPanel } from "@/components/HarvestPanel";
+import { Tutorial, TutorialTrigger } from "@/components/Tutorial";
 import { usePlanetState } from "@/hooks/use-planet-state";
 
 export const Route = createFileRoute("/")({
@@ -20,6 +21,7 @@ function CrustView() {
   const p = data?.syrup_pressure ?? 0;
   return (
     <main className="relative w-screen h-screen overflow-hidden">
+      <Tutorial />
       {/* top-left telemetry */}
       <header className="absolute top-8 left-8 z-10">
         <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground">Sector ɸ-7 // The Crust</p>
@@ -27,6 +29,7 @@ function CrustView() {
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground mt-1">
           Cherry-pie macrocosm · Glaze layer 0.04
         </p>
+        <div className="mt-3"><TutorialTrigger /></div>
       </header>
 
       {/* center orbit */}
