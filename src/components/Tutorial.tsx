@@ -68,7 +68,7 @@ export function Tutorial({ force, onClose }: { force?: boolean; onClose?: () => 
       style={{ background: "oklch(8% 0.03 20 / 0.82)", backdropFilter: "blur(10px)" }}
     >
       <div
-        className="clip-blob relative px-14 py-14 max-w-xl w-full ease-viscous animate-scale-in"
+        className="clip-blob-soft relative px-12 py-12 max-w-xl w-full ease-viscous animate-scale-in"
         style={{
           background: "oklch(16% 0.06 18)",
           boxShadow: "var(--shadow-deep), var(--shadow-glow)",

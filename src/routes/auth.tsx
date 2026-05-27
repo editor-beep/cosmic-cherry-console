@@ -92,7 +92,7 @@ function AuthView() {
         </aside>
 
         <div
-          className="clip-blob relative px-14 py-16 ease-viscous"
+          className="clip-blob-soft relative px-14 py-16 ease-viscous"
           style={{
             background: "oklch(16% 0.06 18)",
             boxShadow: "var(--shadow-deep), var(--shadow-glow)",
