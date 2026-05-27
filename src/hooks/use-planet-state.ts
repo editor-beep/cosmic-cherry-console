@@ -9,7 +9,11 @@ export function usePlanetState() {
   const qc = useQueryClient();
   const q = useQuery({
     queryKey: ["planet"],
-    queryFn: () => fetchPlanet(),
+    queryFn: async () => {
+      const r = await fetchPlanet();
+      console.log("[planet]", r);
+      return r;
+    },
     refetchInterval: 15000,
   });
 
