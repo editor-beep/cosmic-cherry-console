@@ -7,7 +7,7 @@ const NODES = [
   { to: "/refinery", label: "Filling", angle: 150 },
 ] as const;
 
-export function OrbitNav({ radius = 280 }: { radius?: number }) {
+export function OrbitNav({ radius = 340 }: { radius?: number }) {
   const loc = useLocation();
   const { user, signOut } = useAuth();
   return (
