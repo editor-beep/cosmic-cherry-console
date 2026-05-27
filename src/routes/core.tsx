@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { usePlanetState } from "@/hooks/use-planet-state";
 
 export const Route = createFileRoute("/core")({
@@ -11,13 +12,55 @@ export const Route = createFileRoute("/core")({
   component: PitView,
 });
 
+const DOCTRINE = [
+  "The pit anchors the planet. Pry to relieve, never to shatter.",
+  "A seed that fractures yields no second harvest.",
+  "Syrup is currency. Pressure is debt. Balance is creed.",
+  "Listen to the lattice; it hums before it splits.",
+  "Every harvester is a finger on the planet's pulse.",
+  "Glaze is memory. Crust is law. Pit is origin.",
+];
+
+const EVENTS = [
+  { t: "−02:14", msg: "Microfissure sealed at strata 7", level: "ok" as const },
+  { t: "−04:38", msg: "Pry cycle absorbed 142 psi spike", level: "ok" as const },
+  { t: "−07:02", msg: "Lattice resonance: 41.2 Hz", level: "info" as const },
+  { t: "−09:51", msg: "Harvester ψ-12 calibrated yield", level: "info" as const },
+  { t: "−13:20", msg: "Glaze layer drift +0.003", level: "warn" as const },
+  { t: "−18:44", msg: "Seed core thermal: 318 K", level: "info" as const },
+  { t: "−22:09", msg: "Syrup vein rerouted, sector 4", level: "ok" as const },
+];
+
 function PitView() {
   const { data } = usePlanetState();
   const p = data?.syrup_pressure ?? 0;
   const integrity = Math.max(0, (1 - p / 1000) * 100);
   const totalPit = Number(data?.total_pit ?? 0);
   const totalJuice = Number(data?.total_juice ?? 0);
+  const totalCrust = Number(data?.total_crust ?? 0);
   const fissure = Math.min(99, p / 12);
+  const resonance = 38 + (p / 1000) * 18;
+
+  // Rotating doctrine
+  const [dIdx, setDIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setDIdx((d) => (d + 1) % DOCTRINE.length), 6000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Seismograph: 64 points, animated phase
+  const [phase, setPhase] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setPhase((p) => p + 0.12), 80);
+    return () => clearInterval(t);
+  }, []);
+  const amp = 10 + (p / 1000) * 22;
+  const W = 320, H = 60;
+  const pts = Array.from({ length: 64 }, (_, i) => {
+    const x = (i / 63) * W;
+    const y = H / 2 + Math.sin(i * 0.45 + phase) * amp * 0.6 + Math.sin(i * 0.18 + phase * 0.7) * amp * 0.4;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
 
   return (
     <main className="relative w-screen h-screen overflow-hidden">
@@ -38,32 +81,71 @@ function PitView() {
       </header>
 
       {/* LEFT telemetry column */}
-      <aside className="absolute left-8 top-32 z-10 flex flex-col gap-3 w-64">
+      <aside className="absolute left-8 top-32 z-10 flex flex-col gap-3 w-72">
         <PanelLabel>Core Telemetry</PanelLabel>
         <Readout label="Pressure" value={`${p.toFixed(1)} psi`} accent={p > 800} />
         <Readout label="Integrity" value={`${integrity.toFixed(2)} %`} />
         <Readout label="Lattice" value={p > 800 ? "FRACTURING" : p > 600 ? "STRAINED" : "STABLE"} accent={p > 600} />
         <Readout label="Fissures" value={fissure.toFixed(0)} />
-      </aside>
+        <Readout label="Resonance" value={`${resonance.toFixed(1)} Hz`} />
 
-      {/* RIGHT lore + tallies */}
-      <aside className="absolute right-8 top-32 z-10 flex flex-col gap-3 w-64 text-right">
-        <PanelLabel right>Pit Stabilizers</PanelLabel>
-        <Readout right label="Pry Cycles" value={totalPit.toFixed(1)} />
-        <Readout right label="Juice Drawn" value={totalJuice.toFixed(1)} />
-        <div
-          className="clip-hex px-5 py-4 mt-3 text-left"
-          style={{ background: "oklch(18% 0.06 18)" }}
-        >
-          <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
-            Seed Doctrine
-          </p>
-          <p className="font-mono text-[11px] mt-2 leading-relaxed" style={{ color: "var(--crust)" }}>
-            The pit anchors the planet. Pry to relieve, never to shatter.
-          </p>
+        <PanelLabel className="mt-4">Seismograph</PanelLabel>
+        <div className="clip-hex px-4 py-3" style={{ background: "oklch(18% 0.06 18)" }}>
+          <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+            <line x1="0" y1={H / 2} x2={W} y2={H / 2} stroke="oklch(30% 0.08 18 / 0.5)" strokeDasharray="2 4" />
+            <polyline
+              fill="none"
+              stroke={p > 800 ? "var(--destructive)" : "var(--syrup)"}
+              strokeWidth="1.5"
+              points={pts}
+              style={{ filter: "drop-shadow(0 0 4px currentColor)" }}
+            />
+          </svg>
         </div>
       </aside>
 
+      {/* RIGHT lore + tallies */}
+      <aside className="absolute right-8 top-32 z-10 flex flex-col gap-3 w-72 text-right">
+        <PanelLabel right>Pit Stabilizers</PanelLabel>
+        <Readout right label="Pry Cycles" value={totalPit.toFixed(1)} />
+        <Readout right label="Juice Drawn" value={totalJuice.toFixed(1)} />
+        <Readout right label="Crust Mined" value={totalCrust.toFixed(1)} />
+
+        <PanelLabel right className="mt-4">Seed Doctrine</PanelLabel>
+        <div
+          className="clip-hex px-5 py-4 text-left min-h-[88px] flex items-center"
+          style={{ background: "oklch(18% 0.06 18)" }}
+        >
+          <p
+            key={dIdx}
+            className="font-mono text-[11px] leading-relaxed animate-fade-in"
+            style={{ color: "var(--crust)" }}
+          >
+            <span style={{ color: "var(--syrup)" }}>“</span>
+            {DOCTRINE[dIdx]}
+            <span style={{ color: "var(--syrup)" }}>”</span>
+          </p>
+        </div>
+
+        <PanelLabel right className="mt-4">Tectonic Events</PanelLabel>
+        <div className="flex flex-col gap-1.5 text-left max-h-56 overflow-y-auto scrollbar-none">
+          {EVENTS.map((e, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 px-4 py-2"
+              style={{
+                background: "oklch(16% 0.05 18 / 0.7)",
+                borderLeft: `2px solid ${e.level === "warn" ? "var(--destructive)" : e.level === "ok" ? "var(--syrup)" : "oklch(45% 0.1 30)"}`,
+              }}
+            >
+              <span className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground w-12 shrink-0">{e.t}</span>
+              <span className="font-mono text-[10px]" style={{ color: "var(--crust)" }}>{e.msg}</span>
+            </div>
+          ))}
+        </div>
+      </aside>
+
+      {/* Center seed orb */}
       <div className="absolute inset-0 flex items-center justify-center">
         {[1, 2, 3, 4, 5].map((i) => (
           <div
@@ -104,6 +186,7 @@ function PitView() {
         </div>
       </div>
 
+      {/* Drip pillars */}
       <div className="absolute inset-x-0 top-0 flex justify-around pointer-events-none">
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <span
@@ -125,10 +208,10 @@ function PitView() {
   );
 }
 
-function PanelLabel({ children, right }: { children: React.ReactNode; right?: boolean }) {
+function PanelLabel({ children, right, className = "" }: { children: React.ReactNode; right?: boolean; className?: string }) {
   return (
     <p
-      className={`font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground ${right ? "text-right" : ""}`}
+      className={`font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground ${right ? "text-right" : ""} ${className}`}
     >
       {children}
     </p>
@@ -136,15 +219,9 @@ function PanelLabel({ children, right }: { children: React.ReactNode; right?: bo
 }
 
 function Readout({
-  label,
-  value,
-  accent,
-  right,
+  label, value, accent, right,
 }: {
-  label: string;
-  value: string | number;
-  accent?: boolean;
-  right?: boolean;
+  label: string; value: string | number; accent?: boolean; right?: boolean;
 }) {
   return (
     <div
@@ -153,27 +230,13 @@ function Readout({
     >
       {right ? (
         <>
-          <span
-            className="font-display text-base"
-            style={{ color: accent ? "var(--destructive)" : "var(--syrup)" }}
-          >
-            {value}
-          </span>
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            {label}
-          </span>
+          <span className="font-display text-base" style={{ color: accent ? "var(--destructive)" : "var(--syrup)" }}>{value}</span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{label}</span>
         </>
       ) : (
         <>
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            {label}
-          </span>
-          <span
-            className="font-display text-base"
-            style={{ color: accent ? "var(--destructive)" : "var(--syrup)" }}
-          >
-            {value}
-          </span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{label}</span>
+          <span className="font-display text-base" style={{ color: accent ? "var(--destructive)" : "var(--syrup)" }}>{value}</span>
         </>
       )}
     </div>
