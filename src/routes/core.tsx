@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { usePlanetState } from "@/hooks/use-planet-state";
+import { GameOverlay } from "@/components/GameOverlay";
 
 export const Route = createFileRoute("/core")({
   head: () => ({
@@ -64,6 +65,7 @@ function PitView() {
 
   return (
     <main className="relative w-screen h-screen overflow-hidden">
+      <GameOverlay />
       <Link
         to="/"
         className="absolute top-8 left-8 z-10 font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground hover:text-syrup-glow"
