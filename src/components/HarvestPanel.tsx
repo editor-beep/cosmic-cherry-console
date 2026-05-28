@@ -3,9 +3,9 @@ import { planetStore, type ResourceType } from "@/hooks/use-planet-store";
 import { toast } from "sonner";
 
 const RESOURCES: { type: ResourceType; label: string; hint: string; clip: string }[] = [
-  { type: "juice", label: "Tap Juice", hint: "+ pressure", clip: "clip-petal" },
-  { type: "crust", label: "Mine Crust", hint: "- pressure", clip: "clip-hex" },
-  { type: "pit",   label: "Pry Pit",   hint: "+ stability", clip: "clip-tear" },
+  { type: "juice", label: "Tap Juice", hint: "+ psi · refines", clip: "clip-petal" },
+  { type: "crust", label: "Mine Crust", hint: "− psi · safe vent", clip: "clip-hex" },
+  { type: "pit",   label: "Pry Pit",   hint: "−− psi · risky", clip: "clip-tear" },
 ];
 
 export function HarvestPanel() {
