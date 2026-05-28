@@ -1,5 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { useAuth } from "@/hooks/use-auth";
+import { planetStore } from "@/hooks/use-planet-store";
+import { toast } from "sonner";
 
 const NODES = [
   { to: "/", label: "Crust", angle: -90 },
@@ -9,10 +10,8 @@ const NODES = [
 
 export function OrbitNav({ radius = 340 }: { radius?: number }) {
   const loc = useLocation();
-  const { user, signOut } = useAuth();
   return (
     <>
-      {/* faint orbital ring */}
       <div
         className="absolute rounded-full border pointer-events-none"
         style={{
@@ -56,25 +55,19 @@ export function OrbitNav({ radius = 340 }: { radius?: number }) {
           </Link>
         );
       })}
-      {/* auth control orbit node */}
       <div className="absolute top-8 right-8 flex items-center gap-3">
-        {user ? (
-          <button
-            onClick={signOut}
-            className="clip-hex px-6 py-3 font-mono text-[10px] uppercase tracking-[0.25em] ease-viscous"
-            style={{ background: "oklch(22% 0.06 20)", color: "var(--crust)", transition: "all 700ms var(--ease-viscous)" }}
-          >
-            Disengage
-          </button>
-        ) : (
-          <Link
-            to="/auth"
-            className="clip-hex px-6 py-3 font-mono text-[10px] uppercase tracking-[0.25em] ease-viscous"
-            style={{ background: "var(--grad-syrup)", color: "var(--pitted)", transition: "all 700ms var(--ease-viscous)" }}
-          >
-            Enter Pit
-          </Link>
-        )}
+        <button
+          onClick={() => {
+            if (confirm("Reset planet state? All harvests will be lost.")) {
+              planetStore.reset();
+              toast.success("Planet reseeded");
+            }
+          }}
+          className="clip-hex px-6 py-3 font-mono text-[10px] uppercase tracking-[0.25em] ease-viscous"
+          style={{ background: "oklch(22% 0.06 20)", color: "var(--crust)", transition: "all 700ms var(--ease-viscous)" }}
+        >
+          Reseed
+        </button>
       </div>
     </>
   );

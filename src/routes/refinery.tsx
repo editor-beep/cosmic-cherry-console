@@ -1,9 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { getMyHarvests } from "@/lib/planet.functions";
-import { useAuth } from "@/hooks/use-auth";
-import { usePlanetState } from "@/hooks/use-planet-state";
+import { usePlanetStore } from "@/hooks/use-planet-store";
 
 export const Route = createFileRoute("/refinery")({
   head: () => ({
@@ -16,16 +12,8 @@ export const Route = createFileRoute("/refinery")({
 });
 
 function RefineryView() {
-  const { user, loading } = useAuth();
-  const fetchHarvests = useServerFn(getMyHarvests);
-  const { data: planet } = usePlanetState();
-  // Auth-protected serverFn: only enabled once we have a session (avoids prerender 401).
-  const { data, isError } = useQuery({
-    queryKey: ["harvests"],
-    queryFn: () => fetchHarvests(),
-    enabled: !!user,
-    retry: false,
-  });
+  const planet = usePlanetStore();
+  const data = planet.harvests;
 
   return (
     <main className="relative w-screen h-screen overflow-hidden">
@@ -38,7 +26,6 @@ function RefineryView() {
       </header>
 
       <div className="absolute inset-0 grid grid-cols-[1fr_1.2fr] items-center px-24 gap-16">
-        {/* refinery vessel */}
         <div className="relative flex items-center justify-center">
           <div
             className="clip-blob ease-viscous flex items-end justify-center relative overflow-hidden"
@@ -48,11 +35,10 @@ function RefineryView() {
               boxShadow: "var(--shadow-deep)",
             }}
           >
-            {/* fill level based on syrup pressure */}
             <div
               className="absolute bottom-0 left-0 right-0 ease-viscous"
               style={{
-                height: `${Math.min(100, (planet?.syrup_pressure ?? 0) / 10)}%`,
+                height: `${Math.min(100, planet.syrup_pressure / 10)}%`,
                 background: "var(--grad-syrup)",
                 transition: "height 2.4s var(--ease-viscous)",
                 boxShadow: "inset 0 20px 40px oklch(85% 0.2 30 / 0.4)",
@@ -61,26 +47,21 @@ function RefineryView() {
             <div className="relative z-10 pb-10 text-center">
               <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground">Vessel Load</p>
               <p className="font-display text-5xl mt-1" style={{ color: "var(--crust)" }}>
-                {((planet?.syrup_pressure ?? 0) / 10).toFixed(1)}%
+                {(planet.syrup_pressure / 10).toFixed(1)}%
               </p>
             </div>
           </div>
         </div>
 
-        {/* log feed */}
         <div className="flex flex-col gap-3 max-h-[70vh] overflow-y-auto scrollbar-none pr-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground sticky top-0 backdrop-blur py-2"
              style={{ background: "oklch(12% 0.04 22 / 0.85)" }}>
-            Extraction Ledger — last 20
+            Extraction Ledger — last 50
           </p>
-          {loading ? null : !user ? (
+          {data.length === 0 ? (
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              <Link to="/auth" className="text-syrup-glow" style={{ color: "var(--syrup)" }}>Authenticate</Link> to view your ledger.
+              No harvests recorded. Return to the Crust to extract.
             </p>
-          ) : isError ? (
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-destructive">Ledger unreachable.</p>
-          ) : !data || data.length === 0 ? (
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">No harvests recorded. Return to the Crust to extract.</p>
           ) : data.map((h) => (
             <div key={h.id} className="clip-hex flex items-center justify-between px-6 py-4 font-mono text-xs uppercase tracking-[0.2em]"
               style={{ background: "oklch(18% 0.06 18)" }}>

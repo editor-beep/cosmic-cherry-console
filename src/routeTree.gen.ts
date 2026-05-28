@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RefineryRouteImport } from './routes/refinery'
 import { Route as CoreRouteImport } from './routes/core'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 
 const RefineryRoute = RefineryRouteImport.update({
@@ -24,11 +23,6 @@ const CoreRoute = CoreRouteImport.update({
   path: '/core',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,34 +31,30 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/core': typeof CoreRoute
   '/refinery': typeof RefineryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/core': typeof CoreRoute
   '/refinery': typeof RefineryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/core': typeof CoreRoute
   '/refinery': typeof RefineryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/core' | '/refinery'
+  fullPaths: '/' | '/core' | '/refinery'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/core' | '/refinery'
-  id: '__root__' | '/' | '/auth' | '/core' | '/refinery'
+  to: '/' | '/core' | '/refinery'
+  id: '__root__' | '/' | '/core' | '/refinery'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthRoute: typeof AuthRoute
   CoreRoute: typeof CoreRoute
   RefineryRoute: typeof RefineryRoute
 }
@@ -85,13 +75,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoreRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -104,7 +87,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthRoute: AuthRoute,
   CoreRoute: CoreRoute,
   RefineryRoute: RefineryRoute,
 }

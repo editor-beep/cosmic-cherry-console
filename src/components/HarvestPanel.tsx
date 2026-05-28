@@ -1,45 +1,20 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { extractResource } from "@/lib/planet.functions";
-import { useAuth } from "@/hooks/use-auth";
-import { Link } from "@tanstack/react-router";
+import { planetStore, type ResourceType } from "@/hooks/use-planet-store";
 import { toast } from "sonner";
 
-type R = "juice" | "crust" | "pit";
-
-const RESOURCES: { type: R; label: string; hint: string; clip: string }[] = [
+const RESOURCES: { type: ResourceType; label: string; hint: string; clip: string }[] = [
   { type: "juice", label: "Tap Juice", hint: "+ pressure", clip: "clip-petal" },
   { type: "crust", label: "Mine Crust", hint: "- pressure", clip: "clip-hex" },
   { type: "pit",   label: "Pry Pit",   hint: "+ stability", clip: "clip-tear" },
 ];
 
 export function HarvestPanel() {
-  const { user, loading } = useAuth();
-  const extract = useServerFn(extractResource);
-  const qc = useQueryClient();
   const [amount, setAmount] = useState(12);
 
-  const m = useMutation({
-    mutationFn: (type: R) => extract({ data: { resource_type: type, amount } }),
-    onSuccess: (_, type) => {
-      toast.success(`Extracted ${amount} ${type}`);
-      qc.invalidateQueries({ queryKey: ["planet"] });
-      qc.invalidateQueries({ queryKey: ["harvests"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  if (loading) return null;
-  if (!user) {
-    return (
-      <div className="text-center font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
-        <Link to="/auth" className="underline decoration-dotted text-syrup-glow" style={{ color: "var(--syrup)" }}>
-          Authenticate
-        </Link>{" "}to extract resources
-      </div>
-    );
-  }
+  const extract = (type: ResourceType) => {
+    planetStore.extract(type, amount);
+    toast.success(`Extracted ${amount} ${type}`);
+  };
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -50,15 +25,14 @@ export function HarvestPanel() {
           onChange={(e) => setAmount(+e.target.value)}
           className="w-40 accent-[var(--syrup)]"
         />
-        <span className="text-syrup-glow w-8" style={{ color: "var(--syrup)" }}>{amount}</span>
+        <span className="w-8" style={{ color: "var(--syrup)" }}>{amount}</span>
       </div>
       <div className="flex gap-4">
         {RESOURCES.map((r) => (
           <button
             key={r.type}
-            disabled={m.isPending}
-            onClick={() => m.mutate(r.type)}
-            className={`${r.clip} ease-viscous flex flex-col items-center justify-center gap-1 disabled:opacity-50`}
+            onClick={() => extract(r.type)}
+            className={`${r.clip} ease-viscous flex flex-col items-center justify-center gap-1`}
             style={{
               width: 130, height: 130,
               background: "oklch(22% 0.08 20)",

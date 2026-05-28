@@ -1,12 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  Outlet, createRootRouteWithContext, useRouter, HeadContent, Scripts, useRouteContext,
+  Outlet, createRootRouteWithContext, useRouter, HeadContent, Scripts,
 } from "@tanstack/react-router";
-import { useEffect } from "react";
 import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
-import { AuthProvider } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -62,39 +59,25 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function AuthSync() {
-  const { queryClient } = useRouteContext({ from: "__root__" });
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      queryClient.invalidateQueries();
-    });
-    return () => subscription.unsubscribe();
-  }, [queryClient]);
-  return null;
-}
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AuthSync />
-        <Outlet />
-        <Toaster
-          theme="dark"
-          toastOptions={{
-            style: {
-              background: "oklch(18% 0.06 18)",
-              color: "oklch(85% 0.1 60)",
-              border: "1px solid oklch(40% 0.12 22 / 0.6)",
-              fontFamily: "var(--font-mono)",
-              fontSize: "11px",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-            },
-          }}
-        />
-      </AuthProvider>
+      <Outlet />
+      <Toaster
+        theme="dark"
+        toastOptions={{
+          style: {
+            background: "oklch(18% 0.06 18)",
+            color: "oklch(85% 0.1 60)",
+            border: "1px solid oklch(40% 0.12 22 / 0.6)",
+            fontFamily: "var(--font-mono)",
+            fontSize: "11px",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }
