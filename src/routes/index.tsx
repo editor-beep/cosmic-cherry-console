@@ -3,10 +3,11 @@ import { CherryPlanet } from "@/components/CherryPlanet";
 import { OrbitNav } from "@/components/OrbitNav";
 import { SyrupGauge } from "@/components/SyrupGauge";
 import { HarvestPanel } from "@/components/HarvestPanel";
+import { PressureSparkline } from "@/components/PressureSparkline";
 import { Tutorial, TutorialTrigger } from "@/components/Tutorial";
 import { GameOverlay } from "@/components/GameOverlay";
 import { usePlanetState } from "@/hooks/use-planet-state";
-import { WIN_TARGET } from "@/hooks/use-planet-store";
+import { WIN_TARGET, streakMultiplier } from "@/hooks/use-planet-store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,7 +23,11 @@ function CrustView() {
   const { data } = usePlanetState();
   const p = data?.syrup_pressure ?? 0;
   const refined = data?.refined ?? 0;
+  const streak = data?.streak ?? 0;
+  const bestRefined = data?.best_refined ?? 0;
+  const psiHistory = data?.psi_history ?? [];
   const pct = Math.min(100, (refined / WIN_TARGET) * 100);
+  const mult = streakMultiplier(streak);
 
   return (
     <main className="relative w-screen h-screen overflow-hidden">
@@ -50,10 +55,31 @@ function CrustView() {
           <div className="h-full transition-all duration-700"
             style={{ width: `${pct}%`, background: "var(--grad-syrup)" }} />
         </div>
-        <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground mt-2">
+        {bestRefined > 0 && (
+          <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground mt-1">
+            best · <span style={{ color: "var(--syrup)" }}>{bestRefined.toFixed(0)}</span>
+          </p>
+        )}
+        <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground mt-1">
           tap juice inside the safe band to refine
         </p>
       </div>
+
+      {/* Streak indicator */}
+      {streak > 1 && (
+        <div
+          className="absolute top-1/2 right-8 z-10 -translate-y-1/2 flex flex-col items-end gap-1"
+          style={{ animation: "streak-pulse 1.4s ease-in-out infinite" }}
+        >
+          <p className="font-mono text-[9px] uppercase tracking-[0.4em] text-muted-foreground">Juice streak</p>
+          <p className="font-display text-4xl text-syrup-glow" style={{ color: "var(--syrup)" }}>
+            {streak}×
+          </p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: "var(--syrup)" }}>
+            +{((mult - 1) * 100).toFixed(0)}% refine bonus
+          </p>
+        </div>
+      )}
 
       <div className="absolute inset-0 flex items-center justify-center">
         <OrbitNav />
@@ -61,7 +87,10 @@ function CrustView() {
       </div>
 
       <section className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-end gap-16 z-10">
-        <SyrupGauge pressure={p} />
+        <div className="flex flex-col gap-3">
+          <SyrupGauge pressure={p} />
+          <PressureSparkline history={psiHistory} width={220} height={48} />
+        </div>
         <HarvestPanel />
         <div className="flex flex-col gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
           <Stat label="Juice" value={data?.total_juice ?? 0} />
