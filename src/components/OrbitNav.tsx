@@ -6,6 +6,7 @@ const NODES = [
   { to: "/", label: "Crust", angle: -90 },
   { to: "/core", label: "Pit", angle: 30 },
   { to: "/refinery", label: "Filling", angle: 150 },
+  { to: "/observatory", label: "Observatory", angle: 270 },
 ] as const;
 
 export function OrbitNav({ radius = 340 }: { radius?: number }) {
