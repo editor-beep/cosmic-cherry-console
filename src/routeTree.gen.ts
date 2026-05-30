@@ -10,18 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RefineryRouteImport } from './routes/refinery'
-import { Route as ObservatoryRouteImport } from './routes/observatory'
 import { Route as CoreRouteImport } from './routes/core'
 import { Route as IndexRouteImport } from './routes/index'
 
 const RefineryRoute = RefineryRouteImport.update({
   id: '/refinery',
   path: '/refinery',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ObservatoryRoute = ObservatoryRouteImport.update({
-  id: '/observatory',
-  path: '/observatory',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoreRoute = CoreRouteImport.update({
@@ -39,34 +33,30 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/core': typeof CoreRoute
   '/refinery': typeof RefineryRoute
-  '/observatory': typeof ObservatoryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/core': typeof CoreRoute
   '/refinery': typeof RefineryRoute
-  '/observatory': typeof ObservatoryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/core': typeof CoreRoute
   '/refinery': typeof RefineryRoute
-  '/observatory': typeof ObservatoryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/core' | '/refinery' | '/observatory'
+  fullPaths: '/' | '/core' | '/refinery'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/core' | '/refinery' | '/observatory'
-  id: '__root__' | '/' | '/core' | '/refinery' | '/observatory'
+  to: '/' | '/core' | '/refinery'
+  id: '__root__' | '/' | '/core' | '/refinery'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CoreRoute: typeof CoreRoute
   RefineryRoute: typeof RefineryRoute
-  ObservatoryRoute: typeof ObservatoryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -76,13 +66,6 @@ declare module '@tanstack/react-router' {
       path: '/refinery'
       fullPath: '/refinery'
       preLoaderRoute: typeof RefineryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/observatory': {
-      id: '/observatory'
-      path: '/observatory'
-      fullPath: '/observatory'
-      preLoaderRoute: typeof ObservatoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/core': {
@@ -106,7 +89,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CoreRoute: CoreRoute,
   RefineryRoute: RefineryRoute,
-  ObservatoryRoute: ObservatoryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
